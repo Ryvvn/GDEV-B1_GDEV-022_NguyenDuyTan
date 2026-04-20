@@ -67,6 +67,7 @@ namespace Player
             GameObject bullet = Instantiate(Bullet, transform.position, Quaternion.identity);
 
             bullet.GetComponent<Rigidbody2D>().velocity = target;
+            Destroy(bullet,3f);
 
             lastShoot = 0;
             
