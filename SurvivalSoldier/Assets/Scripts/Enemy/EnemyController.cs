@@ -42,7 +42,7 @@ public class EnemyController : MonoBehaviour
             PickRandomDirection();
             directionTimer = directionChangeInterval;
         }
-
+        
         transform.position += (Vector3)(moveDirection * moveSpeed * Time.deltaTime);
     }
 

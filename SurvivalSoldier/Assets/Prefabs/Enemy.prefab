@@ -136,5 +136,5 @@ MonoBehaviour:
   hp: 1
   moveSpeed: 1
   directionChangeInterval: 2
-  detectionRange: 5
+  detectionRange: 100
   chaseSpeedMultiplier: 1.2
