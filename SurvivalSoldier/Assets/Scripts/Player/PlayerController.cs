@@ -1,76 +1,76 @@
-using System;
-using System.Collections;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Player
 {
     public class PlayerController : MonoBehaviour
     {
-        public float speed = 10f;
+        [SerializeField] private float speed = 10f;
+        [SerializeField] private float fireRate = 5f;
+        [SerializeField] private float bulletSpeed = 14f;
+        [SerializeField] private GameObject bulletPrefab;
 
         private Vector3 target;
-        private Vector3 direction;
-        [SerializeField] float shootInterval = 0.2f;
-        private float lastShoot;
-        private bool canShoot = true;
+        private float shootTimer;
 
-
-        [SerializeField] private GameObject Bullet;
         private void Update()
         {
-            if(target != null && target != Vector3.zero)
+            if (target != Vector3.zero)
             {
                 MoveTowardTarget(target);
             }
-            if(Input.GetMouseButtonDown(0))
+
+            if (Input.GetMouseButtonDown(0))
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    target.z = transform.position.z;
-                }
-            }
-            lastShoot += Time.deltaTime;
-            if (lastShoot < shootInterval)
-            {
-                canShoot = true;
-            }
-            else
-            {
-                canShoot = false;
+                target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                target.z = transform.position.z;
             }
 
-            if(Input.GetKeyDown("space") && canShoot)
+            shootTimer += Time.deltaTime;
+            float shootInterval = 1f / Mathf.Max(0.01f, fireRate);
+            bool canShoot = shootTimer >= shootInterval;
+
+            if ((Input.GetKey(KeyCode.Space) || Input.GetMouseButton(1)) && canShoot)
             {
-                direction = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                direction.z = transform.position.z;
-                Shoot(direction);
+                Vector3 aimPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                aimPoint.z = transform.position.z;
+                Shoot(aimPoint);
             }
         }
 
-      
-        private void MoveTowardTarget(Vector3 target)
+        private void MoveTowardTarget(Vector3 moveTarget)
         {
-            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-            if (target != null)
+            transform.position = Vector3.MoveTowards(transform.position, moveTarget, speed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, moveTarget) <= 0.1f)
             {
-                if (transform.position.x - target.x <= 0.1f && transform.position.y - target.y < 0.1f)
-                {
-                    target = Vector3.zero;
-                }
+                target = Vector3.zero;
             }
         }
-        private void Shoot(Vector3 target)
+
+        private void Shoot(Vector3 aimPoint)
         {
-          
-            GameObject bullet = Instantiate(Bullet, transform.position, Quaternion.identity);
+            if (bulletPrefab == null)
+            {
+                return;
+            }
 
-            bullet.GetComponent<Rigidbody2D>().velocity = target;
-            Destroy(bullet,3f);
+            Vector2 direction = (aimPoint - transform.position).normalized;
+            GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
 
-            lastShoot = 0;
-            
+            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+            if (bulletRb != null)
+            {
+                bulletRb.velocity = direction * bulletSpeed;
+            }
+
+            Bullet projectile = bullet.GetComponent<Bullet>();
+            if (projectile != null)
+            {
+                projectile.damage = 1;
+            }
+
+            Destroy(bullet, 3f);
+
+            shootTimer = 0f;
         }
     }
 }

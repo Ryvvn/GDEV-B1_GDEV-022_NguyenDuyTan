@@ -1,21 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    public int health = 3;
+    [SerializeField] private int maxHealth = 3;
 
-    
-    // Start is called before the first frame update
-    void Start()
+    public int CurrentHealth { get; private set; }
+
+    private void Awake()
     {
-        
+        CurrentHealth = maxHealth;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void TakeDamage(int damage)
     {
-        
+        CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+
+        if (CurrentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Heal(int amount)
+    {
+        CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+    }
+
+    private void Die()
+    {
+        gameObject.SetActive(false);
     }
 }
